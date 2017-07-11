@@ -5,10 +5,14 @@
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
+#define PI 3.14159265358979323846
+
 KalmanFilter::KalmanFilter() {}
 
 KalmanFilter::~KalmanFilter() {}
 
+// Not used
+/*
 void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
                         MatrixXd &H_in, MatrixXd &R_in, MatrixXd &Q_in) {
     x_ = x_in;
@@ -17,7 +21,7 @@ void KalmanFilter::Init(VectorXd &x_in, MatrixXd &P_in, MatrixXd &F_in,
     Q_ = Q_in;
     H_ = H_in;
     R_ = R_in;
-}
+}*/
 
 void KalmanFilter::Predict() {
   /**
@@ -27,10 +31,11 @@ void KalmanFilter::Predict() {
     // x_{k+1) = F * x_k + w, w~N(0,Q)
     // this updates x and P to one step ahead
     x_ = F_*x_;
-    P_ = F_*P_*F_.transpose() + Q_;
+    Eigen::MatrixXd FT = F_.transpose();
+    P_ = F_*P_*F_*FT + Q_;
     
-    std::cout << x_ << std::endl;
-    std::cout << P_ << std::endl;
+    //std::cout << x_ << std::endl;
+    //std::cout << P_ << std::endl;
 }
 
 void KalmanFilter::Update(const VectorXd &z) {
@@ -40,15 +45,20 @@ void KalmanFilter::Update(const VectorXd &z) {
   */
     // need the full kalman filter algo here
     VectorXd innovation = z - H_ * x_;
-    MatrixXd innovationCov = R_ + H_*P_*H_.transpose();
-    MatrixXd kalmanGain = P_*H_.transpose()*innovationCov.inverse();
+    Eigen::MatrixXd HT = H_.transpose();
+    MatrixXd innovationCov = H_*P_*HT + R_;
+    Eigen::MatrixXd innoCovInv = innovationCov.inverse();
+    MatrixXd kalmanGain = P_*HT*innoCovInv;
     
     x_ = x_ + kalmanGain*innovation;
     P_ = (Id_-kalmanGain*H_)*P_;
     
-    std::cout << x_ << std::endl;
-    std::cout << P_ << std::endl;
-    std::cout << std::endl;
+    if (x_.sum()>1e10)
+        throw("we have an out of range problem");
+    
+    //std::cout << x_ << std::endl;
+    //std::cout << P_ << std::endl;
+    //std::cout << std::endl;
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
@@ -64,6 +74,13 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     
     VectorXd innovation = z - hx;
     
+    //normalizing phi
+    while (innovation[1] > (2*PI)) {
+        innovation[1] -= (2*PI);
+    }
+    while (innovation[1] < -(2*PI)) {
+        innovation[1] += 2*PI;
+    }
     
     MatrixXd J_h = Tools().CalculateJacobian(x_);
     
@@ -73,8 +90,11 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     x_ = x_ + kalmanGain*innovation;
     P_ = (Id_-kalmanGain*J_h)*P_;
     
-    std::cout << x_ << std::endl;
-    std::cout << P_ << std::endl;
-    std::cout << std::endl;
+    if (x_.sum()>1e10)
+        throw("we have an out of range problem");
+    
+    //std::cout << x_ << std::endl;
+    //std::cout << P_ << std::endl;
+    //std::cout << std::endl;
     
 }

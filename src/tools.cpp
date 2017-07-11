@@ -8,14 +8,10 @@ using std::vector;
 Tools::Tools() {}
 
 Tools::~Tools() {}
-
+/*
 VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) {
-  /**
-  TODO:
-    * Calculate the RMSE here.
-  */
-    
+
     Eigen::VectorXd rmse(4);
     
     // check the validity of the following inputs:
@@ -27,30 +23,93 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
         return rmse;
     }
     
+    cout << "Tools step: " << estimations.size() << endl;
+
     //accumulate squared residuals
     for(unsigned int i=0; i < estimations.size(); ++i){
         
         VectorXd residual = estimations[i] - ground_truth[i];
         
         //coefficient-wise multiplication
-        residual = residual.array()*residual.array();
-        rmse += residual;
+        //residual = residual.array()*residual.array();
+        //rmse += residual;
+        for (unsigned int j=0; j<4; ++j)
+            rmse[j] += residual[j]*residual[j];
     }
-    
+    cout << rmse << endl;
     //calculate the mean
     rmse = rmse/estimations.size();
-    
+    cout << rmse << endl;
     //calculate the squared root
-    rmse = rmse.array().sqrt();
-    
+    //rmse = rmse.array().sqrt();
+    for (unsigned int j=0; j<4; ++j)
+    {
+        double rmerr = sqrt(rmse[j]);
+        rmse[j] = rmerr;
+
+    }
+    cout << rmse << endl;
+    //if (estimations.size()==9)//  rmse.sum()>10000.0)
+    //{
+        cout << rmse << endl;
+        double x = 0.0;
+        cout << "i, px, py, gtx, gty" << endl;
+        for(unsigned int i=0; i < estimations.size(); ++i)
+        {
+            cout << i << "," << estimations[i][0] << "," << estimations[i][1] << "," << ground_truth[i][0] << "," << ground_truth[i][1] << endl;
+        }
+        x = 1.0;
+    //}
     //!! hack
-    rmse(0) = 0.0;
-    rmse(1) = 0.0;
+    //rmse(0) = 0.0;
+    //rmse(1) = 0.0;
     rmse(2) = 0.0;
     rmse(3) = 0.0;
     
     return rmse;
 }
+*/
+        
+// simplified, non-vectorized computation
+VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
+                              const vector<VectorXd> &ground_truth) {
+    
+    //
+    const int numSamples = estimations.size();
+    double data[4] = {0.0, 0.0, 0.0, 0.0};
+    // compute the rmse of each component,
+    for (int i=0; i<numSamples; ++i)
+    {
+        for (int j=0; j<4; ++j)
+            data[j] += pow((estimations[i][j] - ground_truth[i][j]),2.0);
+    }
+    
+    for (int j=0; j<4; ++j)
+    {
+        data[j] /= numSamples;
+        data[j] = sqrt(data[j]);
+    }
+    
+    Eigen::VectorXd rmse(4);
+    rmse(0) = data[0];
+    rmse(1) = data[1];
+    rmse(2) = data[2];
+    rmse(3) = data[3];
+    
+    //cout << rmse << endl;
+    if (rmse[0]>0.15)
+    {
+        double x = 0.0;
+        cout << "i, px, py, gtx, gty" << endl;
+        for(unsigned int i=0; i < estimations.size(); ++i)
+        {
+            cout << i << "," << estimations[i][0] << "," << estimations[i][1] << "," << ground_truth[i][0] << "," << ground_truth[i][1] << endl;
+        }
+        x = 1.0;
+    }
+    return rmse;
+}
+
 
 MatrixXd Tools::CalculateJacobian(const VectorXd& x_state) {
   /**

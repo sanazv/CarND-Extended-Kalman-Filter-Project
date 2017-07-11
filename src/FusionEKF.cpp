@@ -41,7 +41,7 @@ FusionEKF::FusionEKF() {
     * Set the process and measurement noises
   */
     Q_ = Eigen::MatrixXd(4,4);
-
+    stepCounter_ = 0;
 }
 
 /**
@@ -65,7 +65,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // first measurement
     cout << "EKF: " << endl;
     ekf_.x_ = VectorXd(4);
-    //ekf_.x_ << 1, 1, 1, 1;
 
     if (measurement_pack.sensor_type_ == MeasurementPackage::RADAR) {
       /**
@@ -90,11 +89,14 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
         ekf_.x_(2) = 0.0;
         ekf_.x_(3) = 0.0;
     }
-      // set the previous timestamp to allow for time updating
-      previous_timestamp_ = measurement_pack.timestamp_;
+    // set the previous timestamp to allow for time updating
+    previous_timestamp_ = measurement_pack.timestamp_;
+    // initialize the error covariance to zero
+    ekf_.P_ = Eigen::MatrixXd::Identity(4, 4);
       
-      ekf_.P_ = Eigen::MatrixXd::Zero(4, 4);
-      ekf_.Id_ = Eigen::MatrixXd::Identity(4, 4);
+    // initialize a helper identity matrix
+    ekf_.Id_ = Eigen::MatrixXd::Identity(4, 4);
+    
     // done initializing, no need to predict or update
     is_initialized_ = true;
     return;
@@ -111,11 +113,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
      * Update the process noise covariance matrix.
      * Use noise_ax = 9 and noise_ay = 9 for your Q matrix.
    */
-    
+
     double noise_ax = 9.0; // \sig_{ax}^2
     double noise_ay = 9.0; // \sig_{ay}^2
     long long currentTime = measurement_pack.timestamp_;
-    double del_t = (currentTime-previous_timestamp_)/1000000.0;
+    double del_t = (currentTime-previous_timestamp_)/1000000.0;  // assuming that the timestamp is to microseconds
     double del4 = pow(del_t, 4.0);
     double del3 = pow(del_t, 3.0);
     double del2 = pow(del_t, 2.0);
@@ -158,9 +160,11 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     // update the timestamp
     previous_timestamp_ = currentTime;
     
+
   // print the output
   cout << "x_ = " << ekf_.x_ << endl;
   cout << "P_ = " << ekf_.P_ << endl;
     
-    double x = 0.;
+    ++stepCounter_;
+
 }
