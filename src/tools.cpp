@@ -33,9 +33,6 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
         
         //coefficient-wise multiplication
         residual = residual.array()*residual.array();
-        //cout << "rmse: " << rmse << endl;
-        //cout << "residual: " << residual << endl;
-        
         rmse += residual;
         
     }
@@ -45,51 +42,9 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
     
     //calculate the squared root
     rmse = rmse.array().sqrt();
-    //if (estimations.size()==9)
-    //{
-       /* cout << rmse << endl;
-        double x = 0.0;
-        cout << "i, px, py, gtx, gty" << endl;
-        for(unsigned int i=0; i < estimations.size(); ++i)
-        {
-            cout << i << "," << estimations[i][0] << "," << estimations[i][1] << "," << ground_truth[i][0] << "," << ground_truth[i][1] << endl;
-        }
-        x = 1.0; */
-    //}
 
-    return rmse;
-}
-
-        
-// simplified, non-vectorized computation
-VectorXd Tools::CalculateRMSE2(const vector<VectorXd> &estimations,
-                              const vector<VectorXd> &ground_truth) {
-    
-    //
-    const int numSamples = estimations.size();
-    double data[4] = {0.0, 0.0, 0.0, 0.0};
-    // compute the rmse of each component,
-    for (int i=0; i<numSamples; ++i)
-    {
-        for (int j=0; j<4; ++j)
-            data[j] += pow((estimations[i][j] - ground_truth[i][j]),2.0);
-    }
-    
-    for (int j=0; j<4; ++j)
-    {
-        data[j] /= numSamples;
-        data[j] = sqrt(data[j]);
-    }
-    
-    Eigen::VectorXd rmse(4);
-    rmse(0) = data[0];
-    rmse(1) = data[1];
-    rmse(2) = data[2];
-    rmse(3) = data[3];
-    
-    //cout << rmse << endl;
-    if (rmse[0]>0.15)
-    {
+    /*{
+        cout << rmse << endl;
         double x = 0.0;
         cout << "i, px, py, gtx, gty" << endl;
         for(unsigned int i=0; i < estimations.size(); ++i)
@@ -97,7 +52,8 @@ VectorXd Tools::CalculateRMSE2(const vector<VectorXd> &estimations,
             cout << i << "," << estimations[i][0] << "," << estimations[i][1] << "," << ground_truth[i][0] << "," << ground_truth[i][1] << endl;
         }
         x = 1.0;
-    }
+    }*/
+
     return rmse;
 }
 
