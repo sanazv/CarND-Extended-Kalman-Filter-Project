@@ -8,11 +8,12 @@ using std::vector;
 Tools::Tools() {}
 
 Tools::~Tools() {}
-/*
+
 VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) {
 
     Eigen::VectorXd rmse(4);
+    rmse << 0.0, 0.0, 0.0, 0.0;
     
     // check the validity of the following inputs:
     //  * the estimation vector size should not be zero
@@ -23,7 +24,7 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
         return rmse;
     }
     
-    cout << "Tools step: " << estimations.size() << endl;
+    //cout << "Tools step: " << estimations.size() << endl;
 
     //accumulate squared residuals
     for(unsigned int i=0; i < estimations.size(); ++i){
@@ -31,47 +32,37 @@ VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
         VectorXd residual = estimations[i] - ground_truth[i];
         
         //coefficient-wise multiplication
-        //residual = residual.array()*residual.array();
-        //rmse += residual;
-        for (unsigned int j=0; j<4; ++j)
-            rmse[j] += residual[j]*residual[j];
+        residual = residual.array()*residual.array();
+        //cout << "rmse: " << rmse << endl;
+        //cout << "residual: " << residual << endl;
+        
+        rmse += residual;
+        
     }
-    cout << rmse << endl;
+    
     //calculate the mean
     rmse = rmse/estimations.size();
-    cout << rmse << endl;
+    
     //calculate the squared root
-    //rmse = rmse.array().sqrt();
-    for (unsigned int j=0; j<4; ++j)
-    {
-        double rmerr = sqrt(rmse[j]);
-        rmse[j] = rmerr;
-
-    }
-    cout << rmse << endl;
-    //if (estimations.size()==9)//  rmse.sum()>10000.0)
+    rmse = rmse.array().sqrt();
+    //if (estimations.size()==9)
     //{
-        cout << rmse << endl;
+       /* cout << rmse << endl;
         double x = 0.0;
         cout << "i, px, py, gtx, gty" << endl;
         for(unsigned int i=0; i < estimations.size(); ++i)
         {
             cout << i << "," << estimations[i][0] << "," << estimations[i][1] << "," << ground_truth[i][0] << "," << ground_truth[i][1] << endl;
         }
-        x = 1.0;
+        x = 1.0; */
     //}
-    //!! hack
-    //rmse(0) = 0.0;
-    //rmse(1) = 0.0;
-    rmse(2) = 0.0;
-    rmse(3) = 0.0;
-    
+
     return rmse;
 }
-*/
+
         
 // simplified, non-vectorized computation
-VectorXd Tools::CalculateRMSE(const vector<VectorXd> &estimations,
+VectorXd Tools::CalculateRMSE2(const vector<VectorXd> &estimations,
                               const vector<VectorXd> &ground_truth) {
     
     //

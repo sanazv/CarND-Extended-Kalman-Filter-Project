@@ -90,8 +90,6 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     x_ = x_ + kalmanGain*innovation;
     P_ = (Id_-kalmanGain*J_h)*P_;
     
-    if (x_.sum()>1e10)
-        throw("we have an out of range problem");
     
     //std::cout << x_ << std::endl;
     //std::cout << P_ << std::endl;
