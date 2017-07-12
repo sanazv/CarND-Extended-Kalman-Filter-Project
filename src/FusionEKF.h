@@ -46,8 +46,9 @@ private:
   Eigen::MatrixXd Hj_;
     
   Eigen::MatrixXd Q_;
+  Eigen::MatrixXd F_;
     
-    int stepCounter_;
+  int stepCounter_;
 
 };
 

@@ -50,8 +50,6 @@ int main()
       if (s != "")
       {
           
-          cout << s << endl;
-          
         auto j = json::parse(s);
 
         std::string event = j[0].get<std::string>();

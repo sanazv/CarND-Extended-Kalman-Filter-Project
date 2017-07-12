@@ -41,6 +41,8 @@ FusionEKF::FusionEKF() {
     * Set the process and measurement noises
   */
     Q_ = Eigen::MatrixXd(4,4);
+    F_ = Eigen::MatrixXd(4,4);
+    
     stepCounter_ = 0;
 }
 
@@ -117,23 +119,22 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
     double noise_ax = 9.0; // \sig_{ax}^2
     double noise_ay = 9.0; // \sig_{ay}^2
     long long currentTime = measurement_pack.timestamp_;
-    double del_t = (currentTime-previous_timestamp_)/1000000.0;  // assuming that the timestamp is to microseconds
+    double del_t = (currentTime-previous_timestamp_)/1000000.0;  // assuming that the timestamp is in microseconds
     double del4 = pow(del_t, 4.0);
     double del3 = pow(del_t, 3.0);
     double del2 = pow(del_t, 2.0);
-    Q_ = Eigen::MatrixXd(4,4);
     Q_ << 0.25*del4*noise_ax , 0.0, 0.5*del3*noise_ax, 0.0,
             0.0, 0.25*del4*noise_ay , 0.0, 0.5*del3*noise_ay,
             0.5*del3*noise_ax , 0.0, del2*noise_ax, 0.0,
             0.0, 0.5*del3*noise_ay , 0.0, del2*noise_ay;
     ekf_.Q_ = Q_; // set the process covariance
     
-    Eigen::MatrixXd F = Eigen::MatrixXd(4,4);
-    F << 1.0, 0.0, del_t, 0.0,
+    
+    F_ << 1.0, 0.0, del_t, 0.0,
         0.0, 1.0, 0.0, del_t,
         0.0, 0.0, 1.0, 0.0,
         0.0, 0.0, 0.0, 1.0;
-    ekf_.F_ = F;
+    ekf_.F_ = F_;
     ekf_.Predict();
 
   /*****************************************************************************

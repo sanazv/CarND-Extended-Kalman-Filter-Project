@@ -43,18 +43,17 @@ void KalmanFilter::Update(const VectorXd &z) {
   TODO:
     * update the state by using Kalman Filter equations
   */
-    // need the full kalman filter algo here
+    // Kalman update
     VectorXd innovation = z - H_ * x_;
+    
     Eigen::MatrixXd HT = H_.transpose();
     MatrixXd innovationCov = H_*P_*HT + R_;
+    
     Eigen::MatrixXd innoCovInv = innovationCov.inverse();
     MatrixXd kalmanGain = P_*HT*innoCovInv;
     
     x_ = x_ + kalmanGain*innovation;
-    P_ = (Id_-kalmanGain*H_)*P_;
-    
-    if (x_.sum()>1e10)
-        throw("we have an out of range problem");
+    P_ = (Id_ - kalmanGain*H_)*P_;
     
     //std::cout << x_ << std::endl;
     //std::cout << P_ << std::endl;
@@ -88,7 +87,7 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     MatrixXd kalmanGain = P_*J_h.transpose()*innovationCov.inverse();
     
     x_ = x_ + kalmanGain*innovation;
-    P_ = (Id_-kalmanGain*J_h)*P_;
+    P_ = (Id_ - kalmanGain*J_h)*P_;
     
     
     //std::cout << x_ << std::endl;
